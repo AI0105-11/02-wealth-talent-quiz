@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>天賦財富維度測驗</title>
+<meta name="description" content="10 題找出你的天賦財富維度，量身打造專屬財富規劃。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Noto+Serif+TC:wght@600;700;900&display=swap" rel="stylesheet">
+<style>
+  /* ===== 設定 ===== */
+  :root{
+    --bg:#0a0a0d;
+    --bg-2:#15110a;
+    --card:rgba(255,255,255,0.045);
+    --card-line:rgba(245,208,97,0.28);
+    --gold:#f5d061;
+    --gold-soft:#e8c578;
+    --gold-deep:#c79a2e;
+    --grad-gold:linear-gradient(135deg,#fbe9a8 0%,#f5d061 38%,#d4a017 100%);
+    --text:#f3efe4;
+    --text-dim:#b9b09a;
+    --text-mute:#8a8270;
+    --ok:#7ad29a;
+    --err:#e98a8a;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{
+    font-family:"Noto Sans TC",sans-serif;
+    background:
+      radial-gradient(900px 600px at 50% -10%,rgba(245,208,97,0.10),transparent 60%),
+      radial-gradient(700px 500px at 90% 110%,rgba(199,154,46,0.10),transparent 55%),
+      linear-gradient(180deg,var(--bg) 0%,var(--bg-2) 50%,var(--bg) 100%);
+    background-attachment:fixed;
+    color:var(--text);
+    min-height:100%;
+    line-height:1.75;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{
+    max-width:680px;
+    margin:0 auto;
+    padding:32px 20px 64px;
+    min-height:100%;
+  }
+  .serif{font-family:"Noto Serif TC",serif;}
+  .gold-text{
+    background:var(--grad-gold);
+    -webkit-background-clip:text;background-clip:text;
+    -webkit-text-fill-color:transparent;
+  }
+
+  /* ===== 共用元件 ===== */
+  .screen{display:none;animation:fade .45s ease;}
+  .screen.active{display:block;}
+  @keyframes fade{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:none;}}
+
+  .card{
+    background:var(--card);
+    border:1px solid var(--card-line);
+    border-radius:18px;
+    padding:30px 26px;
+    backdrop-filter:blur(6px);
+  }
+
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    font-family:"Noto Sans TC",sans-serif;
+    font-weight:700;font-size:1.05rem;
+    border:none;border-radius:999px;
+    padding:15px 34px;cursor:pointer;
+    transition:transform .15s ease,box-shadow .2s ease,opacity .2s ease;
+    text-decoration:none;
+  }
+  .btn-gold{
+    background:var(--grad-gold);
+    color:#241c05;
+    box-shadow:0 8px 26px rgba(245,208,97,0.28);
+  }
+  .btn-gold:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(245,208,97,0.42);}
+  .btn-gold:active{transform:translateY(0);}
+  .btn-ghost{
+    background:transparent;
+    color:var(--gold-soft);
+    border:1px solid var(--card-line);
+    font-weight:500;
+  }
+  .btn-ghost:hover{border-color:var(--gold);color:var(--gold);}
+  .btn:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none;}
+  .btn-block{display:flex;width:100%;}
+
+  /* ===== 封面 ===== */
+  .cover{text-align:center;padding-top:18px;}
+  .cover .eyebrow{
+    letter-spacing:.42em;font-size:.78rem;color:var(--gold-soft);
+    font-weight:700;margin-bottom:18px;
+  }
+  .cover .eyebrow::before,.cover .eyebrow::after{content:"✦";margin:0 12px;color:var(--gold-deep);}
+  .cover h1{
+    font-size:2.85rem;font-weight:900;line-height:1.3;
+    margin-bottom:10px;letter-spacing:.04em;
+  }
+  .cover .sub{color:var(--text-dim);font-size:1rem;margin-bottom:28px;}
+  .intro-box{
+    text-align:left;border-radius:16px;padding:22px 24px;margin:0 0 26px;
+    background:rgba(245,208,97,0.05);
+    border:1px solid var(--card-line);
+  }
+  .intro-box p{color:var(--text-dim);font-size:.97rem;}
+  .intro-box p+p{margin-top:10px;}
+  .cover-meta{
+    display:flex;justify-content:center;gap:26px;
+    color:var(--text-mute);font-size:.85rem;margin-bottom:30px;
+  }
+  .cover-meta span{display:flex;align-items:center;gap:6px;}
+  .types-row{
+    display:flex;justify-content:center;flex-wrap:wrap;gap:8px;margin-bottom:32px;
+  }
+  .type-chip{
+    font-size:.82rem;color:var(--gold-soft);
+    border:1px solid var(--card-line);border-radius:999px;
+    padding:5px 14px;
+  }
+
+  /* ===== 進度條 ===== */
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;
+    margin-bottom:14px;
+  }
+  .qcount{font-size:.88rem;color:var(--text-mute);font-weight:500;}
+  .qcount b{color:var(--gold);font-size:1.05rem;font-family:"Noto Serif TC",serif;}
+  .progress{
+    height:7px;border-radius:999px;background:rgba(255,255,255,0.07);
+    overflow:hidden;margin-bottom:30px;
+  }
+  .progress-fill{
+    height:100%;width:0;border-radius:999px;
+    background:var(--grad-gold);
+    transition:width .4s cubic-bezier(.4,0,.2,1);
+  }
+
+  /* ===== 題目 ===== */
+  .question{
+    font-family:"Noto Serif TC",serif;
+    font-size:1.42rem;font-weight:700;line-height:1.55;
+    margin-bottom:24px;
+  }
+  .question .qnum{color:var(--gold);margin-right:6px;}
+  .options{display:flex;flex-direction:column;gap:13px;}
+  .option{
+    display:flex;align-items:center;gap:14px;
+    background:var(--card);
+    border:1px solid rgba(255,255,255,0.09);
+    border-radius:14px;
+    padding:16px 18px;cursor:pointer;
+    transition:border-color .18s ease,background .18s ease,transform .12s ease;
+    text-align:left;width:100%;color:var(--text);
+    font-size:1rem;font-family:inherit;
+  }
+  .option:hover{border-color:var(--card-line);background:rgba(245,208,97,0.06);}
+  .option:active{transform:scale(.99);}
+  .option .mark{
+    flex-shrink:0;width:30px;height:30px;border-radius:50%;
+    border:1.5px solid var(--card-line);
+    display:flex;align-items:center;justify-content:center;
+    font-weight:700;color:var(--gold-soft);font-size:.9rem;
+    transition:all .18s ease;
+  }
+  .option.selected{
+    border-color:var(--gold);
+    background:rgba(245,208,97,0.12);
+  }
+  .option.selected .mark{
+    background:var(--grad-gold);color:#241c05;border-color:transparent;
+  }
+  .nav-row{margin-top:26px;}
+  .btn-back{
+    background:transparent;border:none;color:var(--text-mute);
+    font-size:.92rem;cursor:pointer;padding:8px 4px;
+    display:inline-flex;align-items:center;gap:6px;
+    transition:color .15s ease;
+  }
+  .btn-back:hover{color:var(--gold-soft);}
+  .btn-back:disabled{opacity:.3;cursor:not-allowed;}
+
+  /* ===== 結果頁 ===== */
+  .result-head{text-align:center;margin-bottom:8px;}
+  .result-head .eyebrow{
+    letter-spacing:.4em;font-size:.76rem;color:var(--gold-soft);font-weight:700;
+  }
+  .result-img-box{
+    margin:18px auto 6px;border-radius:16px;overflow:hidden;
+    border:1px solid var(--card-line);
+    box-shadow:0 16px 48px rgba(0,0,0,0.5),0 0 0 1px rgba(245,208,97,0.08);
+    background:#000;
+  }
+  .result-img-box img{display:block;width:100%;height:auto;}
+  .result-fallback{
+    display:none;text-align:center;padding:30px 22px;
+  }
+  .result-fallback h2{font-size:2rem;font-weight:900;margin-bottom:6px;}
+  .result-fallback .trait{color:var(--gold-soft);font-weight:700;margin-bottom:12px;}
+  .result-fallback p{color:var(--text-dim);font-size:.96rem;}
+
+  /* ===== 表單 ===== */
+  .form-cta{
+    text-align:center;margin:34px 0 22px;
+  }
+  .form-cta .line{
+    display:inline-flex;align-items:center;gap:12px;color:var(--gold);
+    font-family:"Noto Serif TC",serif;font-weight:700;font-size:1.28rem;
+  }
+  .form-cta .line::before,.form-cta .line::after{
+    content:"";width:34px;height:1px;background:var(--card-line);
+  }
+  .form-cta .desc{color:var(--text-dim);font-size:.92rem;margin-top:8px;}
+
+  .form-section{margin-bottom:24px;}
+  .form-section .sec-title{
+    font-weight:700;color:var(--gold-soft);font-size:.95rem;
+    display:flex;align-items:center;gap:8px;margin-bottom:14px;
+  }
+  .form-section .sec-title::before{
+    content:"";width:4px;height:16px;border-radius:2px;background:var(--grad-gold);
+  }
+  .field{margin-bottom:15px;}
+  .field label{
+    display:block;font-size:.9rem;color:var(--text-dim);margin-bottom:6px;font-weight:500;
+  }
+  .field label .req{color:var(--gold);margin-left:3px;}
+  .field label .opt{color:var(--text-mute);font-size:.8rem;margin-left:5px;}
+  .field input[type=text],
+  .field input[type=tel],
+  .field input[type=email],
+  .field input[type=number],
+  .field input[type=date],
+  .field select{
+    width:100%;padding:12px 14px;
+    background:rgba(255,255,255,0.05);
+    border:1px solid rgba(255,255,255,0.12);
+    border-radius:10px;color:var(--text);
+    font-size:.98rem;font-family:inherit;
+    transition:border-color .15s ease,background .15s ease;
+  }
+  .field input:focus,.field select:focus{
+    outline:none;border-color:var(--gold);background:rgba(245,208,97,0.06);
+  }
+  .field input::placeholder{color:var(--text-mute);}
+  .field select{appearance:none;cursor:pointer;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23c79a2e' stroke-width='1.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:right 14px center;padding-right:36px;}
+  .field select option{background:#15110a;color:var(--text);}
+
+  .choice-grid{display:flex;flex-wrap:wrap;gap:9px;}
+  .choice{
+    position:relative;cursor:pointer;
+  }
+  .choice input{position:absolute;opacity:0;width:0;height:0;}
+  .choice span{
+    display:inline-block;padding:9px 16px;border-radius:999px;
+    border:1px solid rgba(255,255,255,0.13);
+    font-size:.92rem;color:var(--text-dim);
+    transition:all .15s ease;
+  }
+  .choice input:checked+span{
+    border-color:var(--gold);background:rgba(245,208,97,0.14);color:var(--gold);font-weight:700;
+  }
+  .field-inline{display:flex;align-items:center;gap:10px;}
+  .field-inline .grow{flex:1;}
+  #salesCountField{display:none;}
+  .err-msg{color:var(--err);font-size:.84rem;margin-top:6px;display:none;}
+  .field.has-error input,.field.has-error select{border-color:var(--err);}
+  .field.has-error .err-msg{display:block;}
+
+  /* ===== 感謝 ===== */
+  .thanks{
+    display:none;text-align:center;padding:30px 20px;
+    background:rgba(122,210,154,0.06);
+    border:1px solid rgba(122,210,154,0.25);
+    border-radius:16px;margin-bottom:24px;
+  }
+  .thanks .ic{
+    width:54px;height:54px;border-radius:50%;margin:0 auto 14px;
+    background:var(--grad-gold);color:#241c05;
+    display:flex;align-items:center;justify-content:center;
+    font-size:1.7rem;font-weight:900;
+  }
+  .thanks h3{font-size:1.3rem;font-weight:900;margin-bottom:6px;}
+  .thanks p{color:var(--text-dim);font-size:.94rem;}
+
+  .result-actions{
+    display:flex;gap:12px;margin-top:8px;flex-wrap:wrap;
+  }
+  .result-actions .btn{flex:1;min-width:150px;}
+
+  /* ===== Toast ===== */
+  .toast{
+    position:fixed;left:50%;bottom:34px;transform:translateX(-50%) translateY(20px);
+    background:var(--grad-gold);color:#241c05;
+    font-weight:700;font-size:.94rem;
+    padding:13px 26px;border-radius:999px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.4);
+    opacity:0;pointer-events:none;transition:all .3s ease;z-index:99;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  .footnote{
+    text-align:center;color:var(--text-mute);font-size:.78rem;
+    margin-top:34px;line-height:1.7;
+  }
+
+  @media (max-width:560px){
+    .wrap{padding:24px 16px 52px;}
+    .cover h1{font-size:2.2rem;}
+    .card{padding:24px 18px;}
+    .question{font-size:1.22rem;}
+    .cover-meta{gap:16px;}
+    .result-actions .btn{min-width:100%;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ========== 封面 ========== -->
+  <section id="screen-intro" class="screen active">
+    <div class="cover">
+      <div class="eyebrow serif">財富天賦調查</div>
+      <h1 class="serif">天賦財富<span class="gold-text">維度測驗</span></h1>
+      <p class="sub">找出你的財富天賦，看見最適合你的致富路徑</p>
+
+      <div class="intro-box">
+        <p>這份調查旨在協助我們了解您的財富天賦，並根據您的特質提供最適合的資產配置建議。</p>
+        <p>請針對以下 <b style="color:var(--gold-soft)">10 個情境</b>，選出最直覺的選項。完成後，我們將為您量身打造一份專屬規劃。</p>
+      </div>
+
+      <div class="cover-meta">
+        <span>📝 共 10 題</span>
+        <span>⏱ 約 3 分鐘</span>
+        <span>🎯 4 種天賦類型</span>
+      </div>
+
+      <div class="types-row">
+        <span class="type-chip">⚡ 發電機型</span>
+        <span class="type-chip">🔥 火焰型</span>
+        <span class="type-chip">🍃 節奏型</span>
+        <span class="type-chip">🛡 鋼鐵型</span>
+      </div>
+
+      <button class="btn btn-gold btn-block" onclick="startQuiz()">開始測驗 →</button>
+    </div>
+    <div class="footnote">您填寫的資料僅供顧問規劃使用，我們將妥善保密。</div>
+  </section>
+
+  <!-- ========== 測驗 ========== -->
+  <section id="screen-quiz" class="screen">
+    <div class="topbar">
+      <div class="qcount">第 <b id="qNow">1</b> / 10 題</div>
+      <div class="qcount" id="qPct">10%</div>
+    </div>
+    <div class="progress"><div class="progress-fill" id="progressFill"></div></div>
+
+    <div class="card">
+      <div class="question serif" id="questionText"></div>
+      <div class="options" id="optionsBox"></div>
+      <div class="nav-row">
+        <button class="btn-back" id="backBtn" onclick="prevQuestion()">← 返回上一題</button>
+      </div>
+    </div>
+    <div class="footnote">依直覺作答即可，沒有標準答案。</div>
+  </section>
+
+  <!-- ========== 結果 ========== -->
+  <section id="screen-result" class="screen">
+    <div class="result-head">
+      <div class="eyebrow serif">✦ 測驗結果 ✦</div>
+    </div>
+
+    <div class="result-img-box">
+      <img id="resultImg" src="" alt="測驗結果" onerror="showResultFallback()">
+    </div>
+    <div class="result-fallback card" id="resultFallback">
+      <h2 class="serif gold-text" id="fbTitle"></h2>
+      <div class="trait" id="fbTrait"></div>
+      <p id="fbDesc"></p>
+    </div>
+
+    <!-- 表單 -->
+    <form id="leadForm" onsubmit="submitForm(event)" novalidate>
+      <div class="form-cta">
+        <div class="line serif">為您量身打造專屬規劃</div>
+        <div class="desc">透過以下資訊分析後，顧問將依您的天賦類型，為您整理一份專屬財富規劃並與您說明。</div>
+      </div>
+
+      <!-- 基本資料 -->
+      <div class="form-section card">
+        <div class="sec-title">基本資料</div>
+        <div class="field" id="f-name">
+          <label>姓名<span class="req">*</span></label>
+          <input type="text" name="name" placeholder="您的稱呼">
+          <div class="err-msg">請填寫姓名</div>
+        </div>
+        <div class="field">
+          <label>生日<span class="opt">（選填）</span></label>
+          <input type="date" name="birthday">
+        </div>
+        <div class="field">
+          <label>職業<span class="opt">（選填）</span></label>
+          <input type="text" name="occupation" placeholder="例：行銷企劃">
+        </div>
+        <div class="field">
+          <label>星座<span class="opt">（選填）</span></label>
+          <select name="zodiac">
+            <option value="">請選擇</option>
+            <option>牡羊座</option><option>金牛座</option><option>雙子座</option>
+            <option>巨蟹座</option><option>獅子座</option><option>處女座</option>
+            <option>天秤座</option><option>天蠍座</option><option>射手座</option>
+            <option>摩羯座</option><option>水瓶座</option><option>雙魚座</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>平均月收入<span class="opt">（選填）</span></label>
+          <select name="monthly_income">
+            <option value="">請選擇</option>
+            <option>3 萬以下</option>
+            <option>3–5 萬</option>
+            <option>5–8 萬</option>
+            <option>8–12 萬</option>
+            <option>12 萬以上</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 理財現況 -->
+      <div class="form-section card">
+        <div class="sec-title">理財現況</div>
+        <div class="field">
+          <label>是否有業務向您提案的經驗？<span class="opt">（選填）</span></label>
+          <div class="choice-grid" id="salesExpGroup">
+            <label class="choice"><input type="radio" name="sales_exp" value="無"><span>無</span></label>
+            <label class="choice"><input type="radio" name="sales_exp" value="有"><span>有</span></label>
+          </div>
+          <div class="field-inline" id="salesCountField" style="margin-top:10px;">
+            <span style="color:var(--text-dim);font-size:.9rem;">提案次數約</span>
+            <input type="number" name="sales_count" min="0" style="width:90px;" placeholder="次數">
+            <span style="color:var(--text-dim);font-size:.9rem;">次</span>
+          </div>
+        </div>
+        <div class="field">
+          <label>最感興趣的理財工具<span class="opt">（可複選 / 選填）</span></label>
+          <div class="choice-grid">
+            <label class="choice"><input type="checkbox" name="interest_tools" value="定存"><span>定存</span></label>
+            <label class="choice"><input type="checkbox" name="interest_tools" value="儲蓄保單"><span>儲蓄保單</span></label>
+            <label class="choice"><input type="checkbox" name="interest_tools" value="基金"><span>基金</span></label>
+            <label class="choice"><input type="checkbox" name="interest_tools" value="股票"><span>股票</span></label>
+            <label class="choice"><input type="checkbox" name="interest_tools" value="無"><span>無</span></label>
+          </div>
+        </div>
+        <div class="field">
+          <label>目前正在使用的理財工具<span class="opt">（可複選 / 選填）</span></label>
+          <div class="choice-grid">
+            <label class="choice"><input type="checkbox" name="current_tools" value="定存"><span>定存</span></label>
+            <label class="choice"><input type="checkbox" name="current_tools" value="儲蓄保單"><span>儲蓄保單</span></label>
+            <label class="choice"><input type="checkbox" name="current_tools" value="基金"><span>基金</span></label>
+            <label class="choice"><input type="checkbox" name="current_tools" value="股票"><span>股票</span></label>
+            <label class="choice"><input type="checkbox" name="current_tools" value="無"><span>無</span></label>
+          </div>
+        </div>
+      </div>
+
+      <!-- 理財目標 -->
+      <div class="form-section card">
+        <div class="sec-title">理財目標</div>
+        <div class="field">
+          <label>您現階段為了什麼目標而努力理財？<span class="opt">（選填）</span></label>
+          <div class="choice-grid">
+            <label class="choice"><input type="radio" name="goal" value="買車"><span>買車</span></label>
+            <label class="choice"><input type="radio" name="goal" value="買房"><span>買房</span></label>
+            <label class="choice"><input type="radio" name="goal" value="開店"><span>開店</span></label>
+            <label class="choice"><input type="radio" name="goal" value="退休"><span>退休</span></label>
+            <label class="choice"><input type="radio" name="goal" value="財務自由"><span>財務自由</span></label>
+          </div>
+        </div>
+        <div class="field">
+          <label>完成上述目標大約需要準備多少錢？<span class="opt">（選填）</span></label>
+          <input type="text" name="goal_amount" placeholder="例：300 萬">
+        </div>
+        <div class="field">
+          <label>現階段每個月能運用多少預算來完成目標？<span class="opt">（選填）</span></label>
+          <input type="text" name="monthly_budget" placeholder="例：1 萬 5">
+        </div>
+        <div class="field">
+          <label>資料整理好後，方便為您說明的時間？<span class="opt">（選填）</span></label>
+          <div class="choice-grid">
+            <label class="choice"><input type="radio" name="available_time" value="早上"><span>早上</span></label>
+            <label class="choice"><input type="radio" name="available_time" value="下午"><span>下午</span></label>
+            <label class="choice"><input type="radio" name="available_time" value="晚上"><span>晚上</span></label>
+            <label class="choice"><input type="radio" name="available_time" value="下班後"><span>下班後</span></label>
+            <label class="choice"><input type="radio" name="available_time" value="休假日"><span>休假日</span></label>
+          </div>
+        </div>
+      </div>
+
+      <!-- 聯絡方式 -->
+      <div class="form-section card">
+        <div class="sec-title">聯絡方式</div>
+        <div class="field">
+          <label>聯絡電話<span class="opt">（選填）</span></label>
+          <input type="tel" name="phone" placeholder="0900-000-000">
+        </div>
+        <div class="field" id="f-email">
+          <label>Email<span class="opt">（選填）</span></label>
+          <input type="email" name="email" placeholder="you@example.com">
+          <div class="err-msg">Email 格式不正確</div>
+        </div>
+        <div class="field">
+          <label>Line ID<span class="opt">（選填）</span></label>
+          <input type="text" name="line_id" placeholder="您的 Line ID">
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-gold btn-block" id="submitBtn">送出，領取我的專屬規劃</button>
+    </form>
+
+    <!-- 感謝 -->
+    <div class="thanks" id="thanksBox">
+      <div class="ic">✓</div>
+      <h3>已收到您的資料！</h3>
+      <p>顧問將盡快依您的天賦類型，為您整理專屬財富規劃並與您聯繫。</p>
+    </div>
+
+    <div class="result-actions">
+      <button class="btn btn-ghost" onclick="restart()">↻ 重新測驗</button>
+      <button class="btn btn-ghost" onclick="shareLink()">🔗 分享給朋友</button>
+    </div>
+
+    <div class="footnote">您填寫的資料僅供顧問規劃使用，我們將妥善保密。</div>
+  </section>
+
+</div>
+
+<div class="toast" id="toast">連結已複製！</div>
+
+<script>
+/* ============================================================
+   天賦財富維度測驗 — 屬性最高分型
+   串接設定：將下方 SHEET_ENDPOINT 換成你的 Apps Script /exec 網址
+   ============================================================ */
+var SHEET_ENDPOINT = "YOUR_APPS_SCRIPT_URL_HERE";
+
+/* ---- 題目資料（A→發電機型 B→火焰型 C→節奏型 D→鋼鐵型）---- */
+var QUESTIONS = [
+  { q:"關於理財，您目前最核心的目標是？", opts:[
+    {t:"追求爆發性成長，創造全新的財富管道。", type:"generator"},
+    {t:"透過人脈與資源交換，讓資產跟著團隊一起增值。", type:"flame"},
+    {t:"確保現金流穩定，能支應生活中的每一項支出。", type:"rhythm"},
+    {t:"建立一套自動化的複利系統，讓資產精準運作。", type:"steel"} ]},
+  { q:"當市場出現一個全新的投資標的（如 AI 科技股、新創項目）時，您的反應是？", opts:[
+    {t:"太有趣了！我喜歡研究這類具備前瞻性的新計畫。", type:"generator"},
+    {t:"看看身邊有哪些厲害的朋友已經進場，跟著高手走。", type:"flame"},
+    {t:"觀察一段時間，等市場趨勢穩定、風險降低後再考慮。", type:"rhythm"},
+    {t:"開始蒐集相關白皮書與歷史數據，進行嚴謹的邏輯分析。", type:"steel"} ]},
+  { q:"如果帳面資產突然縮水了 10%，您的第一個念頭通常是？", opts:[
+    {t:"沒關係，我再換個更具潛力的標的賺回來就好。", type:"generator"},
+    {t:"找我的理財顧問或有經驗的朋友聊聊，尋求建議與支持。", type:"flame"},
+    {t:"沒什麼感覺，我相信只要放得夠久，它一定會漲回來。", type:"rhythm"},
+    {t:"檢視當初的買進邏輯是否出錯，重新計算風險止損點。", type:"steel"} ]},
+  { q:"關於保險這件事，您認為它的價值在於？", opts:[
+    {t:"槓桿的功能，用小錢換取大額的創業與生活保障。", type:"generator"},
+    {t:"責任的體現，保護我愛的人以及與我有關聯的人。", type:"flame"},
+    {t:"穩定的儲蓄，這是我資產配置中最安心的基石。", type:"rhythm"},
+    {t:"風險的規避，透過契約條款將不確定性降到最低。", type:"steel"} ]},
+  { q:"在做理財決策時，誰的意見對您影響最大？", opts:[
+    {t:"我自己的直覺與對未來趨勢的判斷。", type:"generator"},
+    {t:"業界權威、導師或是我信任的社群好友。", type:"flame"},
+    {t:"市場目前的熱度與大多數人的實際反應。", type:"rhythm"},
+    {t:"專業的數據報告、試算表與法律合約。", type:"steel"} ]},
+  { q:"您的理想財富生活型態比較接近？", opts:[
+    {t:"自由自在，每天都有新的挑戰與創意可以發揮。", type:"generator"},
+    {t:"充滿溫暖，經常跟好友聚會並有能力回饋社會。", type:"flame"},
+    {t:"安穩舒適，步調緩慢且不需要為金錢感到焦慮。", type:"rhythm"},
+    {t:"高度掌控，資產分布明確且一切都在計畫之中。", type:"steel"} ]},
+  { q:"對於被動收入的理解，您比較偏向哪一種？", opts:[
+    {t:"授權金或品牌溢價，靠點子與個人影響力賺錢。", type:"generator"},
+    {t:"代理或仲介分潤，靠人際媒合與資源串接賺錢。", type:"flame"},
+    {t:"房租或股息，靠時間累積與提供穩定服務賺錢。", type:"rhythm"},
+    {t:"軟體系統或專利，靠架構優化與流程管理賺錢。", type:"steel"} ]},
+  { q:"如果您今天有一筆 100 萬的閒置資金，您會傾向？", opts:[
+    {t:"投入新創事業或高成長股，追求資產翻倍機會。", type:"generator"},
+    {t:"加入高端商會或投資好友的公司，擴張人脈與資源。", type:"flame"},
+    {t:"放在高利活存或穩定的 ETF，等待更安全的時機。", type:"rhythm"},
+    {t:"拆解成不同比例的配置，嚴格執行資產平衡計畫。", type:"steel"} ]},
+  { q:"關於記帳這件事，您的看法是？", opts:[
+    {t:"太麻煩了！我大概知道錢去哪就好，賺錢效率更重要。", type:"generator"},
+    {t:"如果有伴侶或朋友跟我一起互相督促，我才會有動力。", type:"flame"},
+    {t:"有規律的記帳習慣，這能讓我清楚感受到生活節奏。", type:"rhythm"},
+    {t:"我有專門的工具或表格，連每一塊錢的流向都要清楚。", type:"steel"} ]},
+  { q:"當您諮詢理財顧問時，您最希望獲得什麼樣的服務？", opts:[
+    {t:"給我最新的趨勢洞察與極具創意的獲利方案。", type:"generator"},
+    {t:"像是朋友般的陪伴，並能提供跨領域的資源對接。", type:"flame"},
+    {t:"專業且細心的長期服務，幫我守住資產並穩定增長。", type:"rhythm"},
+    {t:"邏輯嚴密、數據透明且法律保障完善的規畫報告。", type:"steel"} ]}
+];
+
+/* ---- 結果資料 ---- */
+var RESULTS = {
+  generator:{ title:"發電機型天賦", trait:"創作者", img:"result-generator.png",
+    desc:"您的特質是創作者。理財上適合追求高成長與新商模。建議專注於品牌與產品開發，透過創意產生財富槓桿。" },
+  flame:{ title:"火焰型天賦", trait:"推廣者", img:"result-flame.png",
+    desc:"您的特質是推廣者。理財上適合透過人脈與社群獲利。您的財富藏在通訊錄裡，信任與合作是您的致富關鍵。" },
+  rhythm:{ title:"節奏型天賦", trait:"執行者", img:"result-rhythm.png",
+    desc:"您的特質是執行者。理財上適合穩定現金流與波段操作。您的優勢是耐心與感官，適合房產或穩定收息工具。" },
+  steel:{ title:"鋼鐵型天賦", trait:"系統家", img:"result-steel.png",
+    desc:"您的特質是系統家。理財上適合數據分析與自動化運作。建議建立明確的理財流程，透過優化效率讓資產倍增。" }
+};
+/* 同分時的優先順序 */
+var TYPE_ORDER = ["generator","flame","rhythm","steel"];
+
+/* ---- 狀態 ---- */
+var idx = 0;
+var answers = new Array(QUESTIONS.length).fill(null); // 存每題選的 type
+var finalResult = null;
+
+/* ---- 畫面切換 ---- */
+function show(id){
+  var s = document.querySelectorAll(".screen");
+  for(var i=0;i<s.length;i++) s[i].classList.remove("active");
+  document.getElementById(id).classList.add("active");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function startQuiz(){
+  idx = 0;
+  answers = new Array(QUESTIONS.length).fill(null);
+  show("screen-quiz");
+  renderQuestion();
+}
+
+function renderQuestion(){
+  var qData = QUESTIONS[idx];
+  document.getElementById("qNow").textContent = idx + 1;
+  var pct = Math.round((idx) / QUESTIONS.length * 100);
+  // 進度條以「已完成題數」為基準，作答中至少顯示一點進度
+  var fillPct = Math.round((idx) / QUESTIONS.length * 100);
+  document.getElementById("progressFill").style.width = fillPct + "%";
+  document.getElementById("qPct").textContent =
+    Math.round((idx + 1) / QUESTIONS.length * 100) + "%";
+
+  document.getElementById("questionText").innerHTML =
+    '<span class="qnum">Q' + (idx + 1) + '.</span>' + escapeHtml(qData.q);
+
+  var box = document.getElementById("optionsBox");
+  box.innerHTML = "";
+  var letters = ["A","B","C","D"];
+  for(var i=0;i<qData.opts.length;i++){
+    (function(i){
+      var opt = qData.opts[i];
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "option" + (answers[idx] === opt.type && answers[idx] !== null && selectedIndex(idx) === i ? " selected" : "");
+      btn.innerHTML = '<span class="mark">' + letters[i] + '</span><span>' + escapeHtml(opt.t) + '</span>';
+      btn.onclick = function(){ selectOption(i); };
+      box.appendChild(btn);
+    })(i);
+  }
+  document.getElementById("backBtn").disabled = (idx === 0);
+}
+
+/* 記住每題實際點的選項 index（避免同 type 重複時高亮錯位）*/
+var answerIndex = new Array(QUESTIONS.length).fill(null);
+function selectedIndex(q){ return answerIndex[q]; }
+
+function selectOption(i){
+  var opt = QUESTIONS[idx].opts[i];
+  answers[idx] = opt.type;
+  answerIndex[idx] = i;
+  // 高亮
+  var opts = document.querySelectorAll("#optionsBox .option");
+  for(var k=0;k<opts.length;k++) opts[k].classList.toggle("selected", k === i);
+  // 進度條推進
+  document.getElementById("progressFill").style.width =
+    Math.round((idx + 1) / QUESTIONS.length * 100) + "%";
+  // 短暫延遲後前進
+  setTimeout(function(){
+    if(idx < QUESTIONS.length - 1){
+      idx++;
+      renderQuestion();
+    } else {
+      finishQuiz();
+    }
+  }, 320);
+}
+
+function prevQuestion(){
+  if(idx > 0){
+    idx--;
+    renderQuestion();
+  }
+}
+
+/* ---- 計分 ---- */
+function computeResult(){
+  var score = {generator:0,flame:0,rhythm:0,steel:0};
+  for(var i=0;i<answers.length;i++){
+    if(answers[i]) score[answers[i]]++;
+  }
+  var best = TYPE_ORDER[0], bestVal = -1;
+  for(var t=0;t<TYPE_ORDER.length;t++){
+    var key = TYPE_ORDER[t];
+    if(score[key] > bestVal){ bestVal = score[key]; best = key; }
+  }
+  return {type:best, score:score};
+}
+
+function finishQuiz(){
+  finalResult = computeResult();
+  var r = RESULTS[finalResult.type];
+
+  // 結果圖卡
+  var img = document.getElementById("resultImg");
+  img.src = r.img;
+  img.alt = r.title + "：" + r.trait;
+
+  // 文字備援
+  document.getElementById("fbTitle").textContent = r.title;
+  document.getElementById("fbTrait").textContent = "您的特質是「" + r.trait + "」";
+  document.getElementById("fbDesc").textContent = r.desc;
+
+  // 重設表單區
+  document.getElementById("leadForm").style.display = "";
+  document.getElementById("thanksBox").style.display = "none";
+  document.getElementById("leadForm").reset();
+  document.getElementById("salesCountField").style.display = "none";
+  clearErrors();
+
+  show("screen-result");
+}
+
+function showResultFallback(){
+  document.querySelector(".result-img-box").style.display = "none";
+  document.getElementById("resultFallback").style.display = "block";
+}
+
+/* ---- 業務提案經驗：選「有」才顯示次數 ---- */
+document.getElementById("salesExpGroup").addEventListener("change", function(e){
+  var show = (e.target.value === "有" && e.target.checked);
+  document.getElementById("salesCountField").style.display = show ? "flex" : "none";
+});
+
+/* ---- 表單送出 ---- */
+function clearErrors(){
+  var fs = document.querySelectorAll(".field.has-error");
+  for(var i=0;i<fs.length;i++) fs[i].classList.remove("has-error");
+}
+
+function getChecked(name){
+  var els = document.querySelectorAll('input[name="' + name + '"]:checked');
+  var out = [];
+  for(var i=0;i<els.length;i++) out.push(els[i].value);
+  return out;
+}
+function getRadio(name){
+  var el = document.querySelector('input[name="' + name + '"]:checked');
+  return el ? el.value : "";
+}
+function getVal(name){
+  var el = document.querySelector('[name="' + name + '"]');
+  return el ? el.value.trim() : "";
+}
+
+function submitForm(e){
+  e.preventDefault();
+  clearErrors();
+  var ok = true;
+
+  // 姓名必填
+  var name = getVal("name");
+  if(!name){
+    document.getElementById("f-name").classList.add("has-error");
+    ok = false;
+  }
+  // Email 若有填，檢查格式
+  var email = getVal("email");
+  if(email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+    document.getElementById("f-email").classList.add("has-error");
+    ok = false;
+  }
+  if(!ok){
+    var firstErr = document.querySelector(".field.has-error");
+    if(firstErr) firstErr.scrollIntoView({behavior:"smooth",block:"center"});
+    return;
+  }
+
+  // 組業務經驗
+  var salesExp = getRadio("sales_exp");
+  if(salesExp === "有"){
+    var cnt = getVal("sales_count");
+    salesExp = cnt ? ("有：" + cnt + "次") : "有";
+  }
+
+  var r = RESULTS[finalResult.type];
+  var payload = {
+    name: name,
+    birthday: getVal("birthday"),
+    occupation: getVal("occupation"),
+    zodiac: getVal("zodiac"),
+    monthly_income: getVal("monthly_income"),
+    sales_exp: salesExp,
+    interest_tools: getChecked("interest_tools").join("、"),
+    current_tools: getChecked("current_tools").join("、"),
+    goal: getRadio("goal"),
+    goal_amount: getVal("goal_amount"),
+    monthly_budget: getVal("monthly_budget"),
+    available_time: getRadio("available_time"),
+    phone: getVal("phone"),
+    email: email,
+    line_id: getVal("line_id"),
+    quiz_result: r.title,
+    quiz_trait: r.trait,
+    quiz_scores: "發電機型 " + finalResult.score.generator +
+                 "／火焰型 " + finalResult.score.flame +
+                 "／節奏型 " + finalResult.score.rhythm +
+                 "／鋼鐵型 " + finalResult.score.steel
+  };
+
+  var btn = document.getElementById("submitBtn");
+  btn.disabled = true;
+  btn.textContent = "送出中…";
+
+  // 串接 Google 試算表（尚未設定時略過，仍顯示感謝畫面）
+  var hasEndpoint = SHEET_ENDPOINT && SHEET_ENDPOINT.indexOf("YOUR_APPS_SCRIPT") === -1;
+  function done(){
+    document.getElementById("leadForm").style.display = "none";
+    document.getElementById("thanksBox").style.display = "block";
+    document.getElementById("thanksBox").scrollIntoView({behavior:"smooth",block:"center"});
+    btn.disabled = false;
+    btn.textContent = "送出，領取我的專屬規劃";
+  }
+  if(hasEndpoint){
+    fetch(SHEET_ENDPOINT, {
+      method:"POST",
+      mode:"no-cors",
+      headers:{"Content-Type":"text/plain;charset=utf-8"},
+      body:JSON.stringify(payload)
+    }).then(done).catch(done);
+  } else {
+    setTimeout(done, 500);
+  }
+}
+
+/* ---- 重新測驗 ---- */
+function restart(){
+  idx = 0;
+  answers = new Array(QUESTIONS.length).fill(null);
+  answerIndex = new Array(QUESTIONS.length).fill(null);
+  finalResult = null;
+  document.querySelector(".result-img-box").style.display = "";
+  document.getElementById("resultFallback").style.display = "none";
+  show("screen-intro");
+}
+
+/* ---- 分享 ---- */
+function shareLink(){
+  var url = window.location.href;
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(url).then(showToast).catch(fallbackCopy);
+  } else {
+    fallbackCopy();
+  }
+  function fallbackCopy(){
+    var ta = document.createElement("textarea");
+    ta.value = url;
+    ta.style.position = "fixed";
+    ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    try{ document.execCommand("copy"); showToast(); }
+    catch(err){ window.prompt("複製這個連結分享給朋友：", url); }
+    document.body.removeChild(ta);
+  }
+}
+
+var toastTimer = null;
+function showToast(){
+  var t = document.getElementById("toast");
+  t.classList.add("show");
+  if(toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ t.classList.remove("show"); }, 2200);
+}
+
+/* ---- 工具 ---- */
+function escapeHtml(str){
+  return String(str)
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+</script>
+</body>
+</html>
